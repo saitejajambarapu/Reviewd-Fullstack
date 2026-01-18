@@ -1,0 +1,13 @@
+docker build -t saitejajambarapu/reviewed-frontend:1.0 ./ReviewedUi.in  # build image
+docker push saitejajambarapu/reviewed-frontend:1.0  # push image
+docker build -t saitejajambarapu/reviewed-backend:1.0 ./ReviewedApi.in  # build image
+docker push saitejajambarapu/reviewed-backend:1.0  #
+
+
+# redeployment in kubernetes
+kubectl set image deployment/frontend frontend=saitejajambarapu/reviewed-frontend:1.0 -n reviewed
+kubectl rollout restart deployment/frontend -n reviewed
+kubectl rollout status deployment/frontend -n reviewed
+
+--------------------------------------------------------------
+ 

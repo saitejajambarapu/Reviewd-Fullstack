@@ -1,0 +1,106 @@
+# services:
+#   mysql:
+#     image: mysql:8.0
+#     container_name: reviewed-mysql
+#     restart: unless-stopped
+#     environment:
+#       MYSQL_DATABASE: reviewed
+#       MYSQL_ROOT_PASSWORD: Sai2714@sql
+#     ports:
+#       - "3307:3306"
+#     volumes:
+#       - mysql_data:/var/lib/mysql
+#     healthcheck:
+#       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pSai2714@sql"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 15
+
+#   backend:
+#     build: ./Reviewed.in
+#     container_name: reviewed-backend
+#     restart: unless-stopped
+#     depends_on:
+#       mysql:
+#         condition: service_healthy
+#     environment:
+#       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/reviewed?useSSL=false&allowPublicKeyRetrieval=true
+#       SPRING_DATASOURCE_USERNAME: root
+#       SPRING_DATASOURCE_PASSWORD: Sai2714@sql
+#       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+#     ports:
+#       - "8080:8080"
+
+#   frontend:
+#     build: ./ReviewedUi.in
+#     container_name: reviewed-frontend
+#     restart: unless-stopped
+#     depends_on:
+#       - backend
+#     ports:
+#       - "3000:80"
+
+# volumes:
+#   mysql_data:
+
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: reviewed-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: reviewed
+      MYSQL_ROOT_PASSWORD: Sai2714@sql
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - reviewed-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pSai2714@sql"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  backend:
+    build: ./Reviewed.in
+    container_name: reviewed-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/reviewed?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Sai2714@sql
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    networks:
+      - reviewed-net
+    # IMPORTANT: Do NOT expose backend publicly
+    expose:
+      - "8080"
+
+  frontend:
+    build:
+      context: ./ReviewedUi.in
+      args:
+        REACT_APP_API_BASE_URL: "http://backend:8080"
+    container_name: reviewed-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - reviewed-net
+    environment:
+      - REACT_APP_API_BASE_URL=http://backend:8080
+
+volumes:
+  mysql_data:
+
+networks:
+  reviewed-net:
+    driver: bridge
+

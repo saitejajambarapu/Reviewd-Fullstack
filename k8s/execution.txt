@@ -1,0 +1,114 @@
+---
+
+## ✅ APPLY (Deploy) Sequence
+
+### 0) Create namespace first
+
+```bash
+kubectl apply -f k8s/namespace.yml
+```
+
+### 1) Secrets + ConfigMaps
+
+```bash
+kubectl apply -f k8s/secrets/
+kubectl apply -f k8s/configmaps/
+```
+
+### 2) MySQL (PVC + Deployment + Service)
+
+```bash
+kubectl apply -f k8s/mysql/
+```
+
+### 3) Backend (Deployment + Service)
+
+```bash
+kubectl apply -f k8s/backend/
+```
+
+### 4) Frontend (Deployment + Service)
+
+```bash
+kubectl apply -f k8s/frontend/
+```
+
+### 5) Ingress (last)
+
+```bash
+kubectl apply -f k8s/ingress/
+```
+
+---
+
+## ✅ Verify after apply
+
+```bash
+kubectl get all -n reviewed
+kubectl get pods -n reviewed -w
+kubectl get svc -n reviewed
+kubectl get ingress -n reviewed
+```
+
+---
+
+# ❌ DELETE (Cleanup) Sequence
+
+Ingress first, then app deployments/services, then DB, then config.
+
+### 1) Delete ingress
+
+```bash
+kubectl delete -f k8s/ingress/
+```
+
+### 2) Delete frontend
+
+```bash
+kubectl delete -f k8s/frontend/
+```
+
+### 3) Delete backend
+
+```bash
+kubectl delete -f k8s/backend/
+```
+
+### 4) Delete mysql
+
+```bash
+kubectl delete -f k8s/mysql/
+```
+
+### 5) Delete configmaps + secrets
+
+```bash
+kubectl delete -f k8s/configmaps/
+kubectl delete -f k8s/secrets/
+```
+
+### 6) Delete namespace (deletes everything inside it)
+
+```bash
+kubectl delete -f k8s/namespace.yml
+```
+
+---
+
+## ⭐ One-liner (Apply everything at once)
+
+Only use this if all YAMLs are correct and structured properly:
+
+```bash
+kubectl apply -f k8s/
+```
+
+## ⭐ One-liner delete (Danger but clean)
+
+```bash
+kubectl delete -f k8s/
+```
+
+---
+
+If you paste your exact folder structure (`k8s/...`) I can give you the **exact commands matching your filenames**.
